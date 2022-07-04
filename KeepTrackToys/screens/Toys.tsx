@@ -1,6 +1,5 @@
 import React, {useEffect, useState} from 'react';
 import {useSelector, useDispatch} from 'react-redux';
-import {update} from '../toyListSlice';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   View,
@@ -10,10 +9,16 @@ import {
   FlatList,
 } from 'react-native';
 
+interface IToys {
+  id: string;
+  toyName: string;
+  toySpecies: string;
+  toyDescription: string;
+}
+
 export function Toys() {
   //   const toys = useSelector(selectToy);
   const dispath = useDispatch();
-  const [update] = useState({});
   const [toys, setToys] = useState([
     {
       id: '0',
@@ -25,23 +30,37 @@ export function Toys() {
 
   useEffect(() => {
     getAllToy();
+    console.log('toys', toys);
   }, []);
 
-  async function getAllToy() {
+  useEffect(() => {
+    console.log('ad', toys);
+    
+  }, [toys])
+
+  const getAllToy = async () => {
     try {
-      const toys = await AsyncStorage.getItem('toys');
-      console.log(toys);
-      if (toys !== null) {
-        return toys;
-      }
-    } catch (e) {
-      console.log(e);
-    }
-  }
+      const data: any = await AsyncStorage.getItem('toys');
+      setToys(data);
+      console.log('data', data);
+      // if (data !== null) {
+      // } else {
+      //   await AsyncStorage.setItem(
+      //     'toys',
+      //     JSON.stringify([
+      //       {
+      //         id: '0',
+      //         toyName: 'toy1',
+      //         toySpecies: 'hello',
+      //         toyDescription: 'toy1 toy1 toy1',
+      //       },
+      //     ]),
+      //   );
+      // }
+    } catch (e) {}
+  };
 
-  function addToy(toy: any) {}
-
-  function renderToy({item}: {item: any}) {
+  const renderToy = ({item}: {item: any}) => {
     return (
       <View key={item.id}>
         <View
@@ -79,12 +98,13 @@ export function Toys() {
       </TouchableOpacity>
       <SafeAreaView>
         <FlatList
-          showsVerticalScrollIndicator={false}
-          showsHorizontalScrollIndicator={false}
+          // showsVerticalScrollIndicator={false}
+          // showsHorizontalScrollIndicator={false}
           data={toys}
-          numColumns={1}
+          // numColumns={1}
           renderItem={renderToy}
-          keyExtractor={(item, index) => String(index)}
+          extraData={toys}
+          // keyExtractor={(item, index) => String(index)}
         />
       </SafeAreaView>
     </View>
