@@ -48,7 +48,9 @@ export function Toys({navigation}: StackScreenProps<StackParamList, 'Root'>) {
       //   },
       // ]);
       const data = await storage.get('toys');
+      const dataCart = await storage.get('carts');
       setToys(data);
+      console.log(dataCart);
     } catch (e) {
       console.log(e);
     }

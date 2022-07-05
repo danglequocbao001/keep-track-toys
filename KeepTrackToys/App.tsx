@@ -11,8 +11,8 @@
 import React, {type PropsWithChildren} from 'react';
 import {StatusBar} from 'react-native';
 import {Provider} from 'react-redux';
-import {Toys} from './screens/Toys';
-import store from './store';
+import {Toys} from './src/screens/Toys';
+import store from './src/store';
 
 export default function App() {
   return (
