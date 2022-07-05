@@ -25,41 +25,48 @@ export function Toys({navigation}: StackScreenProps<StackParamList, 'Root'>) {
 
   const getAllToys = async () => {
     try {
-      // storage.set('toys', [
-      //   {
-      //     id: '0',
-      //     toyDescription: 'alt attribute provides alternative',
-      //     toyName: 'toy1',
-      //     toySpecies: 'tank',
-      //     status: 'active',
-      //   },
-      //   {
-      //     id: '1',
-      //     toyDescription: 'alt attribute provides',
-      //     toyName: 'toy2',
-      //     toySpecies: 'baber',
-      //     status: 'active',
-      //   },
-      //   {
-      //     id: '2',
-      //     toyDescription: 'alt attribute',
-      //     toyName: 'toy3',
-      //     toySpecies: 'later',
-      //     status: 'active',
-      //   },
-      // ]);
-      // storage.set('carts', []);
-      const data = await storage.get('toys');
+      const dataToys = await storage.get('toys');
       const dataCarts = await storage.get('carts');
+
+      if (dataToys == null || dataCarts == null) {
+        storage.set('toys', [
+          {
+            id: '0',
+            toyDescription: 'alt attribute provides alternative',
+            toyName: 'toy1',
+            toySpecies: 'tank',
+            status: 'active',
+          },
+          {
+            id: '1',
+            toyDescription: 'alt attribute provides',
+            toyName: 'toy2',
+            toySpecies: 'baber',
+            status: 'active',
+          },
+          {
+            id: '2',
+            toyDescription: 'alt attribute',
+            toyName: 'toy3',
+            toySpecies: 'later',
+            status: 'active',
+          },
+        ]);
+        storage.set('carts', []);
+        const dataToys = await storage.get('toys');
+        setToys(dataToys);
+      }
       dispatch(actions.cartAmount.update(dataCarts.length));
-      setToys(data);
+      setToys(dataToys);
     } catch (e) {}
   };
 
   async function getCartAmount() {
     try {
       const cartAmount = await storage.get('cartAmount');
-      dispatch(actions.cartAmount.update(cartAmount));
+      cartAmount == null
+        ? dispatch(actions.cartAmount.update(0))
+        : dispatch(actions.cartAmount.update(cartAmount));
     } catch (e) {}
   }
 
