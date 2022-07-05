@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {useSelector, useDispatch} from 'react-redux';
+import {useDispatch} from 'react-redux';
 import {
   View,
   Text,
@@ -7,19 +7,20 @@ import {
   SafeAreaView,
   FlatList,
 } from 'react-native';
-
 import {StackScreenProps} from '@react-navigation/stack';
-
 import storage from '../storage';
 import {StackParamList} from '../types';
+import {actions} from '../redux';
+import {useAppSelector} from '../hooks/useRedux';
 
 export function Toys({navigation}: StackScreenProps<StackParamList, 'Root'>) {
-  //   const toys = useSelector(selectToy);
-  const dispath = useDispatch();
+  const dispatch = useDispatch();
   const [toys, setToys] = useState([]);
+  const cartAmount = useAppSelector(state => state.cart.cartAmount);
 
   useEffect(() => {
     getAllToys();
+    getCartAmount();
   }, []);
 
   const getAllToys = async () => {
@@ -47,14 +48,20 @@ export function Toys({navigation}: StackScreenProps<StackParamList, 'Root'>) {
       //     status: 'active',
       //   },
       // ]);
+      // storage.set('carts', []);
       const data = await storage.get('toys');
-      const dataCart = await storage.get('carts');
+      const dataCarts = await storage.get('carts');
+      dispatch(actions.cartAmount.update(dataCarts.length));
       setToys(data);
-      console.log(dataCart);
-    } catch (e) {
-      console.log(e);
-    }
+    } catch (e) {}
   };
+
+  async function getCartAmount() {
+    try {
+      const cartAmount = await storage.get('cartAmount');
+      dispatch(actions.cartAmount.update(cartAmount));
+    } catch (e) {}
+  }
 
   const addCarts = async (cart: any) => {
     cart.status = 'in-cart';
@@ -70,6 +77,24 @@ export function Toys({navigation}: StackScreenProps<StackParamList, 'Root'>) {
     }
     setToys(dataToys);
     storage.set('toys', dataToys);
+    dispatch(actions.cartAmount.update(dataCarts.length));
+  };
+
+  const rmCarts = async (cart: any) => {
+    cart.status = 'active';
+    const dataCarts = await storage.get('carts');
+    dataCarts.splice(dataCarts.indexOf(cart), 1);
+    storage.set('carts', dataCarts);
+
+    const dataToys = await storage.get('toys');
+    for (let toy of dataToys) {
+      if (toy.id == cart.id) {
+        toy.status = 'active';
+      }
+    }
+    setToys(dataToys);
+    storage.set('toys', dataToys);
+    dispatch(actions.cartAmount.update(dataCarts.length));
   };
 
   const renderToy = ({item}: {item: any}) => {
@@ -107,7 +132,7 @@ export function Toys({navigation}: StackScreenProps<StackParamList, 'Root'>) {
               height: 35,
               zIndex: 100,
             }}>
-            <Text onPress={() => addCarts(item)} style={{color: '#fff'}}>
+            <Text onPress={() => rmCarts(item)} style={{color: '#fff'}}>
               Carted
             </Text>
           </TouchableOpacity>
@@ -143,19 +168,21 @@ export function Toys({navigation}: StackScreenProps<StackParamList, 'Root'>) {
           padding: 15,
           borderRadius: 30,
         }}>
-        <View
-          style={{
-            width: 20,
-            height: 20,
-            borderRadius: 100,
-            backgroundColor: 'red',
-            position: 'absolute',
-            right: 5,
-            top: -5,
-            alignItems: 'center',
-          }}>
-          <Text style={{color: '#fff'}}>1</Text>
-        </View>
+        {cartAmount == 0 ? null : (
+          <View
+            style={{
+              width: 20,
+              height: 20,
+              borderRadius: 100,
+              backgroundColor: 'red',
+              position: 'absolute',
+              right: 5,
+              top: -5,
+              alignItems: 'center',
+            }}>
+            <Text style={{color: '#fff'}}>{cartAmount}</Text>
+          </View>
+        )}
         <Text style={{color: '#fff', fontWeight: '800'}}>Cart</Text>
       </TouchableOpacity>
     </View>
