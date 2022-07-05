@@ -1,6 +1,5 @@
 import React, {useEffect, useState} from 'react';
 import {useSelector, useDispatch} from 'react-redux';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   View,
   Text,
@@ -9,104 +8,154 @@ import {
   FlatList,
 } from 'react-native';
 
-interface IToys {
-  id: string;
-  toyName: string;
-  toySpecies: string;
-  toyDescription: string;
-}
+import {StackScreenProps} from '@react-navigation/stack';
 
-export function Toys() {
+import storage from '../storage';
+import {StackParamList} from '../types';
+
+export function Toys({navigation}: StackScreenProps<StackParamList, 'Root'>) {
   //   const toys = useSelector(selectToy);
   const dispath = useDispatch();
-  const [toys, setToys] = useState([
-    {
-      id: '0',
-      toyName: 'toy1',
-      toySpecies: 'hello',
-      toyDescription: 'toy1 toy1 toy1',
-    },
-  ]);
+  const [toys, setToys] = useState([]);
 
   useEffect(() => {
-    getAllToy();
-    console.log('toys', toys);
+    getAllToys();
   }, []);
 
-  useEffect(() => {
-    console.log('ad', toys);
-    
-  }, [toys])
-
-  const getAllToy = async () => {
+  const getAllToys = async () => {
     try {
-      const data: any = await AsyncStorage.getItem('toys');
+      // storage.set('toys', [
+      //   {
+      //     id: '0',
+      //     toyDescription: 'alt attribute provides alternative',
+      //     toyName: 'toy1',
+      //     toySpecies: 'tank',
+      //     status: 'active',
+      //   },
+      //   {
+      //     id: '1',
+      //     toyDescription: 'alt attribute provides',
+      //     toyName: 'toy2',
+      //     toySpecies: 'baber',
+      //     status: 'active',
+      //   },
+      //   {
+      //     id: '2',
+      //     toyDescription: 'alt attribute',
+      //     toyName: 'toy3',
+      //     toySpecies: 'later',
+      //     status: 'active',
+      //   },
+      // ]);
+      const data = await storage.get('toys');
       setToys(data);
-      console.log('data', data);
-      // if (data !== null) {
-      // } else {
-      //   await AsyncStorage.setItem(
-      //     'toys',
-      //     JSON.stringify([
-      //       {
-      //         id: '0',
-      //         toyName: 'toy1',
-      //         toySpecies: 'hello',
-      //         toyDescription: 'toy1 toy1 toy1',
-      //       },
-      //     ]),
-      //   );
-      // }
-    } catch (e) {}
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  const addCarts = async (cart: any) => {
+    cart.status = 'in-cart';
+    const dataCarts = await storage.get('carts');
+    dataCarts.push(cart);
+    storage.set('carts', dataCarts);
+
+    const dataToys = await storage.get('toys');
+    for (let toy of dataToys) {
+      if (toy.id == cart.id) {
+        toy.status = 'in-cart';
+      }
+    }
+    setToys(dataToys);
+    storage.set('toys', dataToys);
   };
 
   const renderToy = ({item}: {item: any}) => {
     return (
-      <View key={item.id}>
-        <View
-          style={{
-            justifyContent: 'space-between',
-            flexDirection: 'row',
-          }}>
-          <Text>{item.toyName}</Text>
-          <Text>{item.toySpecies}</Text>
-          <Text>{item.toyDescription}</Text>
+      <View
+        key={item.id}
+        style={{
+          marginTop: 10,
+          justifyContent: 'space-between',
+          flexDirection: 'row',
+        }}>
+        <Text>{item.id}</Text>
+        <Text>{item.toyName}</Text>
+        <Text>{item.toySpecies}</Text>
+        <Text style={{width: 100}}>{item.toyDescription}</Text>
+        {item.status == 'active' ? (
           <TouchableOpacity
-            style={{backgroundColor: '#33cc33', padding: 5, borderRadius: 5}}>
-            <Text style={{color: '#fff'}}>Sửa</Text>
+            style={{
+              backgroundColor: '#33cc33',
+              padding: 5,
+              borderRadius: 5,
+              height: 35,
+              zIndex: 100,
+            }}>
+            <Text onPress={() => addCarts(item)} style={{color: '#fff'}}>
+              Thêm
+            </Text>
           </TouchableOpacity>
+        ) : (
           <TouchableOpacity
-            style={{backgroundColor: '#ff0000', padding: 5, borderRadius: 5}}>
-            <Text style={{color: '#fff'}}>Xoá</Text>
+            style={{
+              backgroundColor: 'orange',
+              padding: 5,
+              borderRadius: 5,
+              height: 35,
+              zIndex: 100,
+            }}>
+            <Text onPress={() => addCarts(item)} style={{color: '#fff'}}>
+              Carted
+            </Text>
           </TouchableOpacity>
-        </View>
+        )}
       </View>
     );
-  }
+  };
 
   return (
-    <View style={{padding: 30}}>
-      <TouchableOpacity
-        style={{
-          backgroundColor: '#3399ff',
-          padding: 5,
-          borderRadius: 5,
-          width: 60,
-          marginBottom: 20,
-        }}>
-        <Text style={{color: '#fff'}}>+ Thêm</Text>
-      </TouchableOpacity>
+    <View
+      style={{
+        padding: 30,
+        flexDirection: 'column',
+        flexGrow: 1,
+        justifyContent: 'space-between',
+      }}>
       <SafeAreaView>
         <FlatList
-          // showsVerticalScrollIndicator={false}
-          // showsHorizontalScrollIndicator={false}
+          showsVerticalScrollIndicator={false}
+          showsHorizontalScrollIndicator={false}
           data={toys}
-          // numColumns={1}
           renderItem={renderToy}
           extraData={toys}
-          // keyExtractor={(item, index) => String(index)}
+          keyExtractor={(item, index) => String(index)}
         />
       </SafeAreaView>
+      <TouchableOpacity
+        onPress={() => navigation.navigate('Carts')}
+        style={{
+          alignItems: 'center',
+          backgroundColor: 'orange',
+          alignSelf: 'flex-end',
+          padding: 15,
+          borderRadius: 30,
+        }}>
+        <View
+          style={{
+            width: 20,
+            height: 20,
+            borderRadius: 100,
+            backgroundColor: 'red',
+            position: 'absolute',
+            right: 5,
+            top: -5,
+            alignItems: 'center',
+          }}>
+          <Text style={{color: '#fff'}}>1</Text>
+        </View>
+        <Text style={{color: '#fff', fontWeight: '800'}}>Cart</Text>
+      </TouchableOpacity>
     </View>
   );
 }

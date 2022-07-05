@@ -1,14 +1,15 @@
-import {combineReducers, configureStore} from '@reduxjs/toolkit';
-import toyListSlice from './toyListSlice';
+import {configureStore} from '@reduxjs/toolkit';
+import {reducers} from './redux/index';
 
-const rootReducer = combineReducers({
-  userList: toyListSlice,
-});
-
-export type RootState = ReturnType<typeof rootReducer>;
+const rootReducer = {
+  cart: reducers.cartAmountReducers,
+};
 
 const store = configureStore({
   reducer: rootReducer,
 });
+
+export type RootState = ReturnType<typeof store.getState>;
+export type AppDispatch = typeof store.dispatch;
 
 export default store;
