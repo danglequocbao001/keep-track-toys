@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import {useDispatch} from 'react-redux';
 import {
   View,
@@ -12,18 +12,25 @@ import storage from '../storage';
 import {StackParamList} from '../types';
 import {actions} from '../redux';
 import {useAppSelector} from '../hooks/useRedux';
+import {useNav} from '../hooks/useNav';
+import {useFocusEffect} from '@react-navigation/native';
 
-export function Toys({navigation}: StackScreenProps<StackParamList, 'Root'>) {
+export function Toys({}: StackScreenProps<StackParamList, 'Root'>) {
   const dispatch = useDispatch();
   const [toys, setToys] = useState([]);
   const cartAmount = useAppSelector(state => state.cart.cartAmount);
 
-  useEffect(() => {
-    getAllToys();
-    getCartAmount();
-  }, []);
+  useFocusEffect(
+    React.useCallback(() => {
+      getAllToys();
+      getCartAmount();
+    }, []),
+  );
 
+  const nav = useNav();
   const getAllToys = async () => {
+    storage.set('toys', null);
+    storage.set('carts', null);
     try {
       const dataToys = await storage.get('toys');
       const dataCarts = await storage.get('carts');
@@ -167,7 +174,7 @@ export function Toys({navigation}: StackScreenProps<StackParamList, 'Root'>) {
         />
       </SafeAreaView>
       <TouchableOpacity
-        onPress={() => navigation.navigate('Carts')}
+        onPress={() => nav.navigate('Carts')}
         style={{
           alignItems: 'center',
           backgroundColor: 'orange',

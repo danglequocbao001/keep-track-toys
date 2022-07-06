@@ -32,4 +32,10 @@ export interface IScreen {
   options?: StackNavigationOptions;
 }
 
+declare global {
+  namespace ReactNavigation {
+    interface RootParamList extends RootStackParamList {}
+  }
+}
+
 export type StackParamList = RootStackParamList;

@@ -8,17 +8,19 @@
  * @format
  */
 
- import React, {type PropsWithChildren} from 'react';
- import {StatusBar} from 'react-native';
- import {Provider} from 'react-redux';
- import {Toys} from './src/screens/Toys';
- import store from './src/store';
- 
- export default function App() {
-   return (
-     <Provider store={store}>
-       <Toys />
-     </Provider>
-   );
- }
- 
+import React from 'react';
+import {Provider} from 'react-redux';
+import store from './src/store';
+import {NavigationContainer} from '@react-navigation/native';
+import {navigationRef} from './src/navigation/RootNavigation';
+import {RootNavigate} from './src/navigation/RootNavigate';
+
+export default function App() {
+  return (
+    <NavigationContainer ref={navigationRef}>
+      <Provider store={store}>
+        <RootNavigate />
+      </Provider>
+    </NavigationContainer>
+  );
+}

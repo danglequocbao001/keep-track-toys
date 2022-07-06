@@ -1,8 +1,8 @@
 import * as React from 'react';
-import {createStackNavigator} from '@react-navigation/stack';
 import {Toys} from '../screens/Toys';
 import {Carts} from '../screens/Carts';
 import {IScreen, RootStackParamList} from '../types';
+import {createNativeStackNavigator} from '@react-navigation/native-stack';
 
 interface IRootScreen extends IScreen {
   name: keyof RootStackParamList;
@@ -24,8 +24,8 @@ const screens: IRootScreen[] = [
   },
 ];
 
-const Stack = createStackNavigator<RootStackParamList>();
-export default function RootNavigator() {
+const Stack = createNativeStackNavigator();
+export function RootNavigate() {
   return (
     <Stack.Navigator screenOptions={{headerShown: false}}>
       {screens.map(screen => (
